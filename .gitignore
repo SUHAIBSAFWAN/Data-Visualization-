@@ -36,3 +36,23 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+# node
+node_modules
+.env
+.env.local
+
+# logs
+logs
+*.log
+
+# next.js
+.next
+out
+
+# build
+dist
+build
+
+# mac/windows/system
+.DS_Store
+Thumbs.db

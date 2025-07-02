@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(EMPLOYEE)
+  entries   Entry[]
+  createdAt DateTime @default(now())
+}
+
+model Form {
+  id        String   @id @default(uuid())
+  name      String
+  fields    Json
+  createdBy String
+  entries   Entry[]
+  createdAt DateTime @default(now())
+}
+
+model Entry {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  form       Form     @relation(fields: [formId], references: [id])
+  formId     String
+  data       Json
+  reported   Boolean  @default(false)
+  reportNote String?
+  createdAt  DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
