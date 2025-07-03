@@ -1,7 +1,10 @@
+import '../styles/globals.css';
+
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
+
 
 export default function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (

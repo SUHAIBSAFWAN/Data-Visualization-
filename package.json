@@ -1,6 +1,10 @@
 {
   "name": "data-viz-app",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -16,9 +20,5 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "npm@10.5.2",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "packageManager": "npm@10.5.2"
 }
