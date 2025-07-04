@@ -1,16 +1,52 @@
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  const [stats, setStats] = useState({
+    users: "-",
+    forms: "-",
+    submissions: "-",
+    pending: "-"
+  });
 
   useEffect(() => {
     if (status === "authenticated" && session.user.role !== "ADMIN") {
       router.push("/unauthorized");
     }
   }, [session, status]);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const [usersRes, formsRes, entriesRes, pendingRes] = await Promise.all([
+          fetch("http://localhost:5000/api/stats/users"),
+          fetch("http://localhost:5000/api/stats/forms"),
+          fetch("http://localhost:5000/api/stats/entries"),
+          fetch("http://localhost:5000/api/stats/pending-reviews"),
+        ]);
+
+        const users = await usersRes.json();
+        const forms = await formsRes.json();
+        const entries = await entriesRes.json();
+        const pending = await pendingRes.json();
+
+        setStats({
+          users: users.totalUsers,
+          forms: forms.totalForms,
+          submissions: entries.totalEntries,
+          pending: pending.pendingReviews
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    }
+
+    fetchStats();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -25,10 +61,10 @@ export default function AdminDashboard() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <DashboardCard title="Total Users" value="34" />
-        <DashboardCard title="Active Forms" value="5" />
-        <DashboardCard title="Submissions" value="243" />
-        <DashboardCard title="Pending Reviews" value="12" />
+        <DashboardCard title="Total Users" value={stats.users} />
+        <DashboardCard title="Active Forms" value={stats.forms} />
+        <DashboardCard title="Submissions" value={stats.submissions} />
+        <DashboardCard title="Pending Reviews" value={stats.pending} />
       </div>
 
       {/* Quick Links */}
@@ -45,7 +81,7 @@ export default function AdminDashboard() {
   );
 }
 
-function DashboardCard({ title, value }: { title: string; value: string }) {
+function DashboardCard({ title, value }: { title: string; value: string | number }) {
   return (
     <div className="bg-white p-6 rounded shadow text-center">
       <div className="text-sm text-gray-500 mb-1">{title}</div>
