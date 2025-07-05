@@ -2,6 +2,10 @@ import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
+// ✅ Use env variable (recommended) or fallback
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+console.log("🌐 Admin Dashboard using API_BASE:", API_BASE); // Debug
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -12,9 +16,10 @@ export default function AdminDashboard() {
     submissions: "-",
     pending: "-"
   });
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (status === "authenticated" && session.user.role !== "ADMIN") {
+    if (status === "authenticated" && session?.user?.role !== "ADMIN") {
       router.push("/unauthorized");
     }
   }, [session, status]);
@@ -23,11 +28,16 @@ export default function AdminDashboard() {
     async function fetchStats() {
       try {
         const [usersRes, formsRes, entriesRes, pendingRes] = await Promise.all([
-          fetch("http://localhost:5000/api/stats/users"),
-          fetch("http://localhost:5000/api/stats/forms"),
-          fetch("http://localhost:5000/api/stats/entries"),
-          fetch("http://localhost:5000/api/stats/pending-reviews"),
+          fetch(`${API_BASE}/api/stats/users`),
+          fetch(`${API_BASE}/api/stats/forms`),
+          fetch(`${API_BASE}/api/stats/entries`),
+          fetch(`${API_BASE}/api/stats/pending-reviews`)
         ]);
+
+        // ✅ If any request fails, throw error
+        if (!usersRes.ok || !formsRes.ok || !entriesRes.ok || !pendingRes.ok) {
+          throw new Error("One or more API responses failed");
+        }
 
         const users = await usersRes.json();
         const forms = await formsRes.json();
@@ -35,13 +45,14 @@ export default function AdminDashboard() {
         const pending = await pendingRes.json();
 
         setStats({
-          users: users.totalUsers,
-          forms: forms.totalForms,
-          submissions: entries.totalEntries,
-          pending: pending.pendingReviews
+          users: users.totalUsers ?? "-",
+          forms: forms.totalForms ?? "-",
+          submissions: entries.totalEntries ?? "-",
+          pending: pending.pendingReviews ?? "-"
         });
-      } catch (error) {
-        console.error("Error fetching stats:", error);
+      } catch (err) {
+        console.error("❌ Error fetching stats:", err);
+        setError(true);
       }
     }
 
@@ -59,7 +70,12 @@ export default function AdminDashboard() {
         Sign Out
       </button>
 
-      {/* Overview Cards */}
+      {error && (
+        <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
+          ⚠️ Failed to load stats. Please ensure backend is running at <code>{API_BASE}</code>.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <DashboardCard title="Total Users" value={stats.users} />
         <DashboardCard title="Active Forms" value={stats.forms} />
@@ -67,7 +83,6 @@ export default function AdminDashboard() {
         <DashboardCard title="Pending Reviews" value={stats.pending} />
       </div>
 
-      {/* Quick Links */}
       <div className="bg-white p-4 rounded shadow">
         <h2 className="text-xl font-semibold mb-2">Quick Links</h2>
         <ul className="list-disc pl-5 text-blue-600 space-y-1">
