@@ -1,10 +1,12 @@
+"use client";
+
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Link from "next/link"; // ✅ added Link
 
-// ✅ Use env variable (recommended) or fallback
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-console.log("🌐 Admin Dashboard using API_BASE:", API_BASE); // Debug
+console.log("🌐 Admin Dashboard using API_BASE:", API_BASE);
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -34,7 +36,6 @@ export default function AdminDashboard() {
           fetch(`${API_BASE}/api/stats/pending-reviews`)
         ]);
 
-        // ✅ If any request fails, throw error
         if (!usersRes.ok || !formsRes.ok || !entriesRes.ok || !pendingRes.ok) {
           throw new Error("One or more API responses failed");
         }
@@ -86,10 +87,10 @@ export default function AdminDashboard() {
       <div className="bg-white p-4 rounded shadow">
         <h2 className="text-xl font-semibold mb-2">Quick Links</h2>
         <ul className="list-disc pl-5 text-blue-600 space-y-1">
-          <li><a href="/form-builder">🧾 Create New Form</a></li>
-          <li><a href="/form-list">📁 View All Forms</a></li>
-          <li><a href="/user-management">👥 Manage Users</a></li>
-          <li><a href="/reports">📊 View Reports</a></li>
+          <li><Link href="/form-builder">🧾 Create New Form</Link></li>
+          <li><Link href="/form-list">📁 View All Forms</Link></li>
+          <li><Link href="/user-management">👥 Manage Users</Link></li>
+          <li><Link href="/reports">📊 View Reports</Link></li>
         </ul>
       </div>
     </div>

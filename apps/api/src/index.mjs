@@ -1,23 +1,18 @@
-// ✅ MUST BE AT THE TOP
-import 'dotenv/config';
-
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import statsRoutes from "./routes/stats.mjs";
+import formsRoutes from "./routes/forms.mjs"; // ✅ New import
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Enable CORS
 app.use(cors());
-
-// ✅ Body parser
 app.use(express.json());
 
-// ✅ API Routes
 app.use("/api/stats", statsRoutes);
+app.use("/api/forms", formsRoutes); // ✅ Mount route
 
-// ✅ Health check
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
