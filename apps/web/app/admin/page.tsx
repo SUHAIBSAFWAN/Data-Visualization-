@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link"; // ✅ added Link
 
@@ -22,7 +22,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.role !== "ADMIN") {
-      router.push("/unauthorized");
+      router.replace("/unauthorized");
     }
   }, [session, status]);
 
